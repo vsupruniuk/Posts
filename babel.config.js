@@ -1,6 +1,20 @@
-module.exports = function(api) {
+module.exports = function getBabelConfig(api) {
   api.cache(true);
+
+  const plugins = [
+    [
+      require.resolve('babel-plugin-module-resolver'),
+      {
+        alias: {
+          '~': './src',
+        },
+        extensions: ['.js', '.ts', '.tsx'],
+      },
+    ],
+  ];
+
   return {
-    presets: ['babel-preset-expo'],
+    presets: ['module:metro-react-native-babel-preset'],
+    plugins,
   };
 };
