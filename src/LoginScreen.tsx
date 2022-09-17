@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, Button } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 
 type User = {
   email: string;
@@ -26,6 +32,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const passwordRegExp = /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [noSuchUser, setNoSuchUser] = useState(false);
   const [loginErrors, setLoginErrors] = useState({
     email: false,
     password: false,
@@ -33,6 +40,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
   const onLoginClick = () => {
     setLoginErrors({
+      ...loginErrors,
       email: !emailRegExp.test(email),
       password: !passwordRegExp.test(password),
     });
@@ -45,44 +53,54 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     <View style={styles.container}>
-      <View>
-        <Text>Email</Text>
+      <View style={styles.inputContainer}>
+        <Text style={styles.inputFieldName}>Email</Text>
 
-        <TextInput value={email} onChangeText={setEmail} />
+        <TextInput value={email} onChangeText={setEmail} style={styles.input} />
 
-        {loginErrors.email && <Text>Incorrect email</Text>}
+        {loginErrors.email && <Text style={styles.error}>Incorrect email</Text>}
       </View>
 
-      <View>
-        <Text>Password</Text>
+      <View style={styles.inputContainer}>
+        <Text style={styles.inputFieldName}>Password</Text>
 
         <TextInput
           secureTextEntry
           value={password}
           onChangeText={setPassword}
+          style={styles.input}
         />
 
         {loginErrors.password && (
-          <Text>
+          <Text style={styles.error}>
             The password must contain at least 6 characters and include at least
             one capital letter or number
           </Text>
         )}
       </View>
 
-      <Button
-        title="Login"
+      <TouchableOpacity
+        style={!email || !password ? styles.buttonDisabled : styles.button}
         onPress={() => {
           onLoginClick();
 
           if (checkIfUserExist()) {
             navigation.navigate('Posts');
+          } else {
+            setNoSuchUser(true);
           }
         }}
         disabled={!email || !password}
-      />
+      >
+        Login
+      </TouchableOpacity>
+
+      {!loginErrors.password && !loginErrors.email && noSuchUser && (
+        <Text style={styles.error}>
+          Incorrect password or user with this email does not exist
+        </Text>
+      )}
     </View>
   );
 };
@@ -92,5 +110,56 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+
+  inputContainer: {
+    marginBottom: 35,
+  },
+
+  inputFieldName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: '#000',
+    borderRadius: 5,
+    width: 250,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+
+  error: {
+    width: 250,
+    color: '#f00',
+  },
+
+  button: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 110,
+    height: 35,
+    backgroundColor: '#28c1fb',
+    borderRadius: 5,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+
+  buttonDisabled: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 110,
+    height: 35,
+    backgroundColor: '#cbcbcb',
+    borderRadius: 5,
+    fontWeight: '600',
+    marginBottom: 10,
   },
 });
